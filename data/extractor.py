@@ -76,15 +76,18 @@ def extract_label(paperfile, classname):
 
 
 def categorize(filename):
-    ids, labels = [], []
+    # ids, labels = [], []
     with open(filename, 'r') as fo:
         for line in fo.readlines():
             tokens = line.strip().split('\t')
-            ids.append(tokens[0])
-            labels.append(tokens[1].split('/')[1])
-    df = pd.DataFrame({'ids': ids,
-                        'labels': labels})
-    print df.describe()
+            print tokens[0] + '\t' + tokens[1].split('/')[1]
+            # ids.append(tokens[0])
+            # labels.append(tokens[1].split('/')[1])
+            # labels.append(tokens[1])
+    # df = pd.DataFrame({'ids': ids,
+    #                     'labels': labels})
+    # print df.describe()
+    # print pd.value_counts(df['labels'])
 
 
 if __name__ == '__main__':

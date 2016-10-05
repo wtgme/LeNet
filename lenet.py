@@ -31,7 +31,7 @@ print("[INFO] downloading MNIST...")
 dataset = datasets.fetch_mldata("MNIST Original")
 
 # reshape the MNIST dataset from a flat list of 784-dim vectors, to
-# 28 x 28 pixel images, then scale the data to the range [0, 1.0]
+# 28 x 28 pixel images, then scale the classifier to the range [0, 1.0]
 # and construct the training and testing splits
 data = dataset.data.reshape((dataset.data.shape[0], 28, 28))
 data = data[:, np.newaxis, :, :]

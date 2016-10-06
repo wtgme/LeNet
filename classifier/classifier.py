@@ -38,6 +38,7 @@ def unify_files(textfile, idlabelfile):
         print text
     print labelmap
 
+
 def transform(textfile, idlabelfile):
     id_text = readfile(textfile)
 

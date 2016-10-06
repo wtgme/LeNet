@@ -8,11 +8,11 @@ import sys
 from os import path
 sys.path.append(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))))
 
-from sklearn import cross_validation
-from sklearn.svm import SVC
 import pickle
 from collections import OrderedDict
 import numpy as np
+import util
+
 
 
 def doc_vect(filename):
@@ -43,6 +43,12 @@ def doc_vect(filename):
     # for model in simple_models[1:]:
     #     model.reset_from(simple_models[0])
     #     print(model)
+    for model in simple_models[:1]:
+        print model
+        for label in range(1, 11):
+            inferred_docvec = model.docvecs[str(label)]
+            print label
+            print('%s:\n %s' % (model, model.most_similar(str(label))))
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
     from gensim.test.test_doc2vec import ConcatenatedDoc2Vec
@@ -50,16 +56,6 @@ def doc_vect(filename):
     models_by_name['dbow+dmc'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[0]])
 
     pickle.dump(models_by_name, open('data/doc2vec.pick', 'w'))
-
-
-def svm_cv(X, y, kernel='linear'):
-    # Cross validation with SVM
-    clf = SVC(kernel=kernel, class_weight='balanced')
-    #When the cv argument is an integer, cross_val_score
-    # uses the KFold or StratifiedKFold strategies by default,
-    # the latter being used if the estimator derives from ClassifierMixin.
-    scores = cross_validation.cross_val_score(clf, X, y, scoring='accuracy', cv=5, n_jobs=5)
-    print("Accuracy: %0.4f (+/- %0.4f)" % (scores.mean(), scores.std()))
 
 
 def classification(filename):
@@ -76,8 +72,7 @@ def classification(filename):
                     # docvect = model.docvecs[tokens[0]]
                     X.append(docvect)
                     y.append(int(tokens[2]))
-        svm_cv(np.array(X), np.array(y))
-
+        util.classifier_cv(np.array(X), np.array(y))
 
 
 def output(filename):
@@ -108,4 +103,4 @@ if __name__ == '__main__':
 
     # '''Out put files'''
     # output('data/cora.data')
-    classification('data/cora.data')
+    # classification('data/cora.data')

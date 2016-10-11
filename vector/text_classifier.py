@@ -108,7 +108,7 @@ def doc_vect(alldocs):
 
 def pre_class(train_docs, test_docs, non_docs):
     train_y, train_X = zip(*[(doc.sentiment, ' '.join(doc.words)) for doc in train_docs])
-    test_y, test_X = zip(*[(doc.sentiment, ' '.joint(doc.words)) for doc in test_docs+non_docs])
+    test_y, test_X = zip(*[(doc.sentiment, ' '.join(doc.words)) for doc in test_docs+non_docs])
     y_lin = util.pre_classify_text(train_X, train_y, test_X, None)
     return y_lin
 
@@ -165,7 +165,7 @@ def process():
             sentiment = [1.0, 0.0, 1.0, 0.0, None, None, None, None][line_no//12500] # [12.5K pos, 12.5K neg]*2 then unknown
             alldocs.append(SentimentDocument(words, tags, split, sentiment))
 
-    doc_vect(alldocs)
+    # doc_vect(alldocs)
     label_vect(alldocs)
 
 

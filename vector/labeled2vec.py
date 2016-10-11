@@ -143,10 +143,9 @@ def vect(X_train, y_train):
                 Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=5, negative=5, hs=0, min_count=1, workers=cores),
                     ]
 
-    # models_by_name = OrderedDict((str(model), model) for model in simple_models)
-    models_by_name = OrderedDict()
+    models_by_name = OrderedDict((str(model), model) for model in simple_models)
     from gensim.test.test_doc2vec import ConcatenatedDoc2Vec
-    # models_by_name['dbow+dmm'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[2]])
+    models_by_name['dbow+dmm'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[2]])
     models_by_name['dbow+dmc'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[0]])
     return models_by_name
 
@@ -155,11 +154,13 @@ def train_label_classification(X, y):
     skf = StratifiedKFold(n_splits=5)
     accuracys = []
     for train_index, test_index in skf.split(X, y):
+        acc_list = []
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
         vect_models = vect(X_train, y_train)
-        X_train_vec, X_test_vec = [], []
+
         for name, model in vect_models.items():
+            X_train_vec, X_test_vec = [], []
             for x in X_train:
                 words = x.split()
                 docvect = model.infer_vector(words)
@@ -168,13 +169,20 @@ def train_label_classification(X, y):
                 words = x.split()
                 docvect = model.infer_vector(words)
                 X_test_vec.append(docvect)
-        logistic = linear_model.LogisticRegression(multi_class='multinomial', solver='newton-cg', n_jobs=multiprocessing.cpu_count())
-        # svc_lin = SVC(kernel='linear', class_weight='balanced')
-        y_lin = logistic.fit(np.array(X_train_vec), y_train).predict(np.array(X_test_vec))
-        score = accuracy_score(y_lin, y_test)
-        print "Fold Accuracy: %0.4f" % (score)
-        accuracys.append(score)
-    print("Overall Accuracy: %0.4f (+/- %0.4f)" % (np.mean(accuracys), np.std(accuracys)))
+            logistic = linear_model.LogisticRegression(multi_class='multinomial', solver='newton-cg', n_jobs=multiprocessing.cpu_count())
+            # svc_lin = SVC(kernel='linear', class_weight='balanced')
+            print len(X_train_vec), len(X_test_vec), len(y_train)
+            y_lin = logistic.fit(np.array(X_train_vec), y_train).predict(np.array(X_test_vec))
+            score = accuracy_score(y_lin, y_test)
+            # print "Fold Accuracy: %0.4f" % (score)
+            acc_list.append(score)
+        accuracys.append(acc_list)
+    accuracys = np.array(accuracys)
+    i = 0
+    for name, model in vect_models.items():
+        print name
+        print("Overall Accuracy: %0.4f (+/- %0.4f)" % (np.mean(accuracys[:, i]), np.std(accuracys[:, i])))
+        i += 1
 
 
 def vect_all(X_train, y_train, X_test, y_predict):
@@ -199,10 +207,9 @@ def vect_all(X_train, y_train, X_test, y_predict):
                 Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=5, negative=5, hs=0, min_count=1, workers=cores),
                     ]
 
-    # models_by_name = OrderedDict((str(model), model) for model in simple_models)
-    models_by_name = OrderedDict()
+    models_by_name = OrderedDict((str(model), model) for model in simple_models)
     from gensim.test.test_doc2vec import ConcatenatedDoc2Vec
-    # models_by_name['dbow+dmm'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[2]])
+    models_by_name['dbow+dmm'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[2]])
     models_by_name['dbow+dmc'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[0]])
     return models_by_name
 
@@ -225,12 +232,14 @@ def pre_class_classification(X, y):
     skf = StratifiedKFold(n_splits=5)
     accuracys = []
     for train_index, test_index in skf.split(X, y):
+        acc_list = []
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
         y_lin = pre_classify(X_train, y_train, X_test, y_test)
         vect_models = vect_all(X_train, y_train, X_test, y_lin)
-        X_train_vec, X_test_vec = [], []
+
         for name, model in vect_models.items():
+            X_train_vec, X_test_vec = [], []
             for x in X_train:
                 words = x.split()
                 docvect = model.infer_vector(words)
@@ -239,13 +248,19 @@ def pre_class_classification(X, y):
                 words = x.split()
                 docvect = model.infer_vector(words)
                 X_test_vec.append(docvect)
-        logistic = linear_model.LogisticRegression(multi_class='multinomial', solver='newton-cg', n_jobs=multiprocessing.cpu_count())
-        # svc_lin = SVC(kernel='linear', class_weight='balanced')
-        y_lin = logistic.fit(np.array(X_train_vec), y_train).predict(np.array(X_test_vec))
-        score = accuracy_score(y_lin, y_test)
-        print "Fold Accuracy: %0.4f" % (score)
-        accuracys.append(score)
-    print("Overall Accuracy: %0.4f (+/- %0.4f)" % (np.mean(accuracys), np.std(accuracys)))
+            logistic = linear_model.LogisticRegression(multi_class='multinomial', solver='newton-cg', n_jobs=multiprocessing.cpu_count())
+            # svc_lin = SVC(kernel='linear', class_weight='balanced')
+            y_lin = logistic.fit(np.array(X_train_vec), y_train).predict(np.array(X_test_vec))
+            score = accuracy_score(y_lin, y_test)
+            print "Fold Accuracy: %0.4f" % (score)
+            acc_list.append(score)
+        accuracys.append(acc_list)
+    accuracys = np.array(accuracys)
+    i = 0
+    for name, model in vect_models.items():
+        print name
+        print("Overall Accuracy: %0.4f (+/- %0.4f)" % (np.mean(accuracys[:, i]), np.std(accuracys[:, i])))
+        i += 1
 
 
 def train_label_run(filename):
@@ -269,7 +284,9 @@ if __name__ == '__main__':
     # # output('data/cora.data')
     # classification('datalea/cora.data')
 
+    print 'Only user training data for label'
     train_label_run('data/cora.data')
+    print 'Pre-classify test data first, and then all label training'
     pre_class_run('data/cora.data')
 
 

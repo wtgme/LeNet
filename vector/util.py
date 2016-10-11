@@ -39,7 +39,7 @@ def logit(X_train, y_train, X_test, y_test):
 def pre_classify_text(X_train, y_train, X_test, y_test=None):
     corpus = np.append(X_train, X_test)
     from sklearn.feature_extraction.text import TfidfVectorizer
-    vectorizer = TfidfVectorizer(min_df=1)
+    vectorizer = TfidfVectorizer(min_df=1, dtype=np.float32)
     X = vectorizer.fit_transform(corpus).toarray()
     """SVM classifier: too slow"""
     # svc_lin = SVC(kernel='linear', class_weight='balanced')

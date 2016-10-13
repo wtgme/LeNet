@@ -38,16 +38,19 @@ def logit(X_train, y_train, X_test, y_test):
 
 def pre_classify_text(X_train, y_train, X_test, y_test=None):
     corpus = np.append(X_train, X_test)
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    vectorizer = TfidfVectorizer(min_df=1, max_features=100000)
-    X = vectorizer.fit_transform(corpus).toarray()
+    from sklearn.feature_extraction.text import HashingVectorizer
+    vectorizer = HashingVectorizer()
+    X = vectorizer.fit_transform(corpus)
     """SVM classifier: too slow"""
     # svc_lin = SVC(kernel='linear', class_weight='balanced')
     # y_lin = svc_lin.fit(X[:len(X_train), :], y_train).predict(X[len(X_train):, :])
     """Parallel KNN: more fast"""
-    from sklearn.neighbors import KNeighborsClassifier
-    neigh = KNeighborsClassifier(n_neighbors=5, n_jobs=multiprocessing.cpu_count())
-    y_lin = neigh.fit(X[:len(X_train), :], y_train).predict(X[len(X_train):, :])
+    # from sklearn.neighbors import KNeighborsClassifier
+    # neigh = KNeighborsClassifier(n_neighbors=5, n_jobs=multiprocessing.cpu_count())
+    '''Batched Logit regression'''
+    from sklearn import linear_model
+    clf = linear_model.SGDClassifier(loss='log', n_jobs=multiprocessing.cpu_count(), )
+    y_lin = clf.fit(X[:len(X_train), :], y_train).predict(X[len(X_train):, :])
     if y_test:
         print "Pre-classification accuracy: %0.4f" % accuracy_score(y_lin, y_test)
     return y_lin

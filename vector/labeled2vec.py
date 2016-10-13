@@ -21,7 +21,8 @@ from sklearn.neighbors import KNeighborsClassifier
 import multiprocessing
 from sklearn import linear_model
 import util
-
+import logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 def label_generate(filename, starK=10, endK=11):
     """Pre-cluster data, and assign predicted labels to each sample"""

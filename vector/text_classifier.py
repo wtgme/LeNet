@@ -17,7 +17,19 @@ from gensim.models.doc2vec import TaggedDocument
 from gensim.test.test_doc2vec import ConcatenatedDoc2Vec
 import util
 import logging
+from collections import namedtuple
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
+
+# Convert text to lower-case and strip punctuation/symbols from words
+def normalize_text(text):
+    norm_text = text.lower()
+    # Replace breaks with spaces
+    norm_text = norm_text.replace('<br />', ' ')
+    # Pad punctuation with spaces on both sides
+    for char in ['.', '"', ',', '(', ')', '!', '?', ';', ':']:
+        norm_text = norm_text.replace(char, ' ' + char + ' ')
+    return norm_text
 
 # ##ONLY RUN with Python3.0
 # def transform():
@@ -122,11 +134,11 @@ def label_doc_vect(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
@@ -166,11 +178,11 @@ def label_vect(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
@@ -199,11 +211,11 @@ def label_vect_no_class(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
@@ -217,25 +229,50 @@ def label_vect_no_class(alldocs):
         util.logit(train_regressors, train_targets, test_regressors, test_targets)
 
 
-def process():
-    # Data Split
-    from collections import namedtuple
+def get_imdb_data():
     SentimentDocument = namedtuple('SentimentDocument', 'words tags split sentiment')
     alldocs = []  # will hold all docs in original order
     with open('aclImdb/alldata-id.txt', 'r') as alldata:
         for line_no, line in enumerate(alldata):
             tokens = line.split()
             words = tokens[1:]
-            tags = [line_no] # `tags = [tokens[0]]` would also work at extra memory cost
-            split = ['train','test','extra','extra'][line_no//25000]  # 25k train, 25k test, 25k extra
-            sentiment = [1.0, 0.0, 1.0, 0.0, None, None, None, None][line_no//12500] # [12.5K pos, 12.5K neg]*2 then unknown
+            tags = [line_no]  # `tags = [tokens[0]]` would also work at extra memory cost
+            split = ['train', 'test', 'extra', 'extra'][line_no // 25000]  # 25k train, 25k test, 25k extra
+            sentiment = [1.0, 0.0, 1.0, 0.0, None, None, None, None][
+                line_no // 12500]  # [12.5K pos, 12.5K neg]*2 then unknown
             alldocs.append(SentimentDocument(words, tags, split, sentiment))
+    return alldocs
 
-    # doc_vect(alldocs)
-    # label_vect(alldocs)
-    label_vect_no_class(alldocs)
-    label_doc_vect(alldocs)
+def get_ng_data():
+    from sklearn.datasets import fetch_20newsgroups
+    remove = ('headers', 'footers', 'quotes')
+    data_train = fetch_20newsgroups(subset='train', shuffle=True, random_state=42,
+                                remove=remove)
+    data_test = fetch_20newsgroups(subset='test', shuffle=True, random_state=42,
+                               remove=remove)
+    y_train, y_test = data_train.target, data_test.target
+    SentimentDocument = namedtuple('SentimentDocument', 'words tags split sentiment')
+    alldocs = []
+    for line_no, line in enumerate(data_train.data):
+            words = normalize_text(line).split()
+            tags = [line_no]  # `tags = [tokens[0]]` would also work at extra memory cost
+            split = 'train'
+            sentiment = y_train[line_no]  # [12.5K pos, 12.5K neg]*2 then unknown
+            alldocs.append(SentimentDocument(words, tags, split, sentiment))
+    train_len = len(data_train.data)
+    for line_no, line in enumerate(data_test.data):
+            words = normalize_text(line).split()
+            tags = [line_no+train_len]  # `tags = [tokens[0]]` would also work at extra memory cost
+            split = 'test'
+            sentiment = y_test[line_no]  # [12.5K pos, 12.5K neg]*2 then unknown
+            alldocs.append(SentimentDocument(words, tags, split, sentiment))
+    return alldocs
+
 
 
 if __name__ == '__main__':
-    process()
+    data = get_imdb_data()
+    doc_vect(data)
+    label_vect(data)
+    label_vect_no_class(data)
+    label_doc_vect(data)

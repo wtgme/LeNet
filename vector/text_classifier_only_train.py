@@ -90,7 +90,7 @@ def normalize_text(text):
 
 
 def doc_vect(alldocs):
-    print 'Doc2Vec'
+    print 'Doc2Vec Each Tag is ID'
     train_docs = [doc for doc in alldocs if doc.split == 'train']
     test_docs = [doc for doc in alldocs if doc.split == 'test']
     print('%d docs: %d train-sentiment, %d test-sentiment' % (len(alldocs), len(train_docs), len(test_docs)))

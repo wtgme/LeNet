@@ -90,6 +90,7 @@ def normalize_text(text):
 
 
 def doc_vect(alldocs):
+    print 'Doc2Vec'
     train_docs = [doc for doc in alldocs if doc.split == 'train']
     test_docs = [doc for doc in alldocs if doc.split == 'test']
     print('%d docs: %d train-sentiment, %d test-sentiment' % (len(alldocs), len(train_docs), len(test_docs)))
@@ -120,6 +121,7 @@ def doc_vect(alldocs):
 
 
 def label_doc_vect(alldocs):
+    print 'Label-doc-vec'
     train_docs = [doc for doc in alldocs if doc.split == 'train']
     test_docs = [doc for doc in alldocs if doc.split == 'test']
     print('%d docs: %d train-sentiment, %d test-sentiment' % (len(alldocs), len(train_docs), len(test_docs)))
@@ -160,6 +162,7 @@ def pre_class(train_docs, test_docs, non_docs):
 
 
 def label_vect(alldocs):
+    print 'Label2Vec with pre-classification'
     train_docs = [doc for doc in alldocs if doc.split == 'train']
     test_docs = [doc for doc in alldocs if doc.split == 'test']
     non_docs = [doc for doc in alldocs if doc.split == 'extra']
@@ -197,6 +200,7 @@ def label_vect(alldocs):
 
 
 def label_vect_no_class(alldocs):
+    print 'Label2Vec without pre-classification'
     train_docs = [doc for doc in alldocs if doc.split == 'train']
     test_docs = [doc for doc in alldocs if doc.split == 'test']
     print('%d docs: %d train-sentiment, %d test-sentiment' % (len(alldocs), len(train_docs), len(test_docs)))

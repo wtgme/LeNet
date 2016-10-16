@@ -102,11 +102,11 @@ def doc_vect(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
@@ -215,11 +215,11 @@ def label_vect_no_class(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
@@ -272,11 +272,15 @@ def get_ng_data():
             alldocs.append(SentimentDocument(words, tags, split, sentiment))
     return alldocs
 
-
+def get_rcv():
+    from sklearn.datasets import fetch_rcv1
+    rcv1 = fetch_rcv1()
+    for doc in rcv1.data:
+        print doc
 
 if __name__ == '__main__':
     data = get_ng_data()
     doc_vect(data)
     # label_vect(data)
-    label_vect_no_class(data)
-    label_doc_vect(data)
+    # label_vect_no_class(data)
+    # label_doc_vect(data)

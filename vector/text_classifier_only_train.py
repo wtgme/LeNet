@@ -250,11 +250,9 @@ def get_imdb_data():
 
 def get_ng_data():
     from sklearn.datasets import fetch_20newsgroups
-    remove = ('headers', 'footers', 'quotes')
-    data_train = fetch_20newsgroups(subset='train', shuffle=True, random_state=42,
-                                remove=remove)
-    data_test = fetch_20newsgroups(subset='test', shuffle=True, random_state=42,
-                               remove=remove)
+    # remove = ('headers', 'footers', 'quotes')
+    data_train = fetch_20newsgroups(subset='train')
+    data_test = fetch_20newsgroups(subset='test')
     y_train, y_test = data_train.target, data_test.target
     SentimentDocument = namedtuple('SentimentDocument', 'words tags split sentiment')
     alldocs = []
@@ -283,5 +281,5 @@ if __name__ == '__main__':
     data = get_ng_data()
     doc_vect(data)
     # label_vect(data)
-    # label_vect_no_class(data)
-    # label_doc_vect(data)
+    label_vect_no_class(data)
+    label_doc_vect(data)

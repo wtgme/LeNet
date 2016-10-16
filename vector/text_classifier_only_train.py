@@ -118,6 +118,7 @@ def doc_vect(alldocs):
         train_targets, train_regressors = zip(*[(doc.sentiment, model.docvecs[doc.tags[0]]) for doc in train_docs])
         test_targets, test_regressors = zip(*[(doc.sentiment, model.infer_vector(doc.words)) for doc in test_docs])
         util.logit(train_regressors, train_targets, test_regressors, test_targets)
+        util.svm(train_regressors, train_targets, test_regressors, test_targets)
 
 
 def label_doc_vect(alldocs):

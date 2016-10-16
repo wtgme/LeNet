@@ -9,7 +9,7 @@ import multiprocessing
 from sklearn import linear_model
 from sklearn.metrics import accuracy_score
 import numpy as np
-
+from sklearn.svm import SVC
 
 # def classifier_cv(X, y, K=5):
 #     skf = StratifiedKFold(n_splits=K)
@@ -31,7 +31,16 @@ def logit(X_train, y_train, X_test, y_test):
     # svc_lin = SVC(kernel='linear', class_weight='balanced')
     y_lin = logistic.fit(X_train, y_train).predict(X_test)
     score = accuracy_score(y_lin, y_test)
-    print "Accuracy: %0.4f" % (score)
+    print "Logit Accuracy: %0.4f" % (score)
+    return score
+
+
+def svm(X_train, y_train, X_test, y_test):
+    # logistic = linear_model.LogisticRegression(multi_class='multinomial', solver='newton-cg', n_jobs=multiprocessing.cpu_count())
+    svc_lin = SVC(kernel='linear', class_weight='balanced')
+    y_lin = svc_lin.fit(X_train, y_train).predict(X_test)
+    score = accuracy_score(y_lin, y_test)
+    print "SVM Accuracy: %0.4f" % (score)
     return score
 
 

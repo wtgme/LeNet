@@ -28,9 +28,9 @@ from sklearn.manifold import TSNE
 # @param float    y1        y axis range (from)
 # @param float    y2        y axis range (to)
 # @param string   title     for diagram
-def draw_words(model, words, pca=False, alternate=True, arrows=True, x1=3, x2=3, y1=3, y2=3, title=''):
+def draw_words(vectors, words, pca=False, alternate=True, arrows=True, title=''):
     # get vectors for given words from model
-    vectors = [model[word] for word in words]
+    # vectors = [model[word] for word in words]
     # vectors = [model.infer_vector(word) for word in words]
 
     if pca:
@@ -40,10 +40,6 @@ def draw_words(model, words, pca=False, alternate=True, arrows=True, x1=3, x2=3,
         tsne = TSNE(n_components=2, random_state=0)
         vectors2d = tsne.fit_transform(vectors)
 
-    # draw image
-    plt.figure(figsize=(6,6))
-    if pca:
-        plt.axis([x1, x2, y1, y2])
 
     first = True # color alternation to divide given groups
     for point, word in zip(vectors2d, words):
@@ -53,20 +49,21 @@ def draw_words(model, words, pca=False, alternate=True, arrows=True, x1=3, x2=3,
         plt.annotate(
             word,
             xy = (point[0], point[1]),
-            xytext = (-7, -6) if first else (7, -6),
+            xytext = (-20, -20) if first else (20, -20),
             textcoords = 'offset points',
             ha = 'right' if first else 'left',
             va = 'bottom',
-            size = "x-large"
+            size = "x-large",
+            arrowprops=dict(arrowstyle="->")
         )
         first = not first if alternate else first
 
     # draw arrows
     if arrows:
         for i in xrange(0, len(words)-1, 2):
-            a = vectors2d[i][0] + 0.04
+            a = vectors2d[i][0]
             b = vectors2d[i][1]
-            c = vectors2d[i+1][0] - 0.04
+            c = vectors2d[i+1][0]
             d = vectors2d[i+1][1]
             plt.arrow(a, b, c-a, d-b,
                 shape='full',
@@ -74,7 +71,7 @@ def draw_words(model, words, pca=False, alternate=True, arrows=True, x1=3, x2=3,
                 edgecolor='#bbbbbb',
                 facecolor='#bbbbbb',
                 length_includes_head=True,
-                head_width=0.08,
+                head_width=0.03,
                 width=0.01
             )
 
@@ -82,8 +79,8 @@ def draw_words(model, words, pca=False, alternate=True, arrows=True, x1=3, x2=3,
     if title:
         plt.title(title)
 
-    plt.tight_layout()
-    plt.show()
+    plt.savefig(title+'.pdf')
+    plt.clf()
 
 '''# get trained model
 model = gensim.models.Word2Vec.load_word2vec_format("model/SG-300-5-NS10-R50.model", binary=True)

@@ -18,6 +18,8 @@ from gensim.test.test_doc2vec import ConcatenatedDoc2Vec
 import util
 import logging
 from collections import namedtuple
+import visualize
+import pickle
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
@@ -102,11 +104,11 @@ def doc_vect(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=400, window=5, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=400, window=5, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=400, window=5, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
@@ -121,7 +123,7 @@ def doc_vect(alldocs):
         util.svm(train_regressors, train_targets, test_regressors, test_targets)
 
 
-def label_doc_vect(alldocs):
+def label_doc_vect(alldocs, labels):
     print 'Label_doc_Vec'
     train_docs = [doc for doc in alldocs if doc.split == 'train']
     test_docs = [doc for doc in alldocs if doc.split == 'test']
@@ -137,11 +139,11 @@ def label_doc_vect(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=400, window=10, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=400, window=10, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=400, window=10, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
@@ -155,52 +157,7 @@ def label_doc_vect(alldocs):
         util.logit(train_regressors, train_targets, test_regressors, test_targets)
 
 
-def pre_class(train_docs, test_docs, non_docs):
-    train_y, train_X = zip(*[(doc.sentiment, ' '.join(doc.words)) for doc in train_docs])
-    test_y, test_X = zip(*[(doc.sentiment, ' '.join(doc.words)) for doc in test_docs+non_docs])
-    y_lin = util.pre_classify_text(train_X, train_y, test_X, None)
-    return y_lin
-
-
-def label_vect(alldocs):
-    print 'Label2Vec with Pre-classification'
-    train_docs = [doc for doc in alldocs if doc.split == 'train']
-    test_docs = [doc for doc in alldocs if doc.split == 'test']
-    non_docs = [doc for doc in alldocs if doc.split == 'extra']
-    print('%d docs: %d train-sentiment, %d test-sentiment' % (len(alldocs), len(train_docs), len(test_docs)))
-    ylin = pre_class(train_docs, test_docs, non_docs)
-    documents = []
-    for doc in train_docs:
-        sentence = TaggedDocument(doc.words, [str(doc.sentiment)])
-        documents.append(sentence)
-    i = 0
-    for doc in test_docs+non_docs:
-        sentence = TaggedDocument(doc.words, [str(ylin[i])])
-        documents.append(sentence)
-        i += 1
-    print len(documents)
-    cores = multiprocessing.cpu_count()
-    simple_models = [
-                # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
-                # PV-DBOW
-                Doc2Vec(documents, dm=0, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
-                # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=10, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
-                    ]
-
-    models_by_name = OrderedDict((str(model), model) for model in simple_models)
-    models_by_name['dbow+dmm'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[2]])
-    models_by_name['dbow+dmc'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[0]])
-
-    for name, model in models_by_name.items():
-        print name
-        train_targets, train_regressors = zip(*[(doc.sentiment, model.infer_vector(doc.words)) for doc in train_docs])
-        test_targets, test_regressors = zip(*[(doc.sentiment, model.infer_vector(doc.words)) for doc in test_docs])
-        util.logit(train_regressors, train_targets, test_regressors, test_targets)
-
-
-def label_vect_no_class(alldocs):
+def label_vect_no_class(alldocs, labels):
     print 'Lable2Vec without Pre-classification'
     train_docs = [doc for doc in alldocs if doc.split == 'train']
     test_docs = [doc for doc in alldocs if doc.split == 'test']
@@ -208,7 +165,7 @@ def label_vect_no_class(alldocs):
     documents = []
     for doc in train_docs:
         if doc.split == 'train':
-            sentence = TaggedDocument(doc.words, [str(doc.sentiment)])
+            sentence = TaggedDocument(doc.words, ['l'+str(doc.sentiment)])
         else:
             sentence = TaggedDocument(doc.words, [])
         documents.append(sentence)
@@ -216,22 +173,27 @@ def label_vect_no_class(alldocs):
     cores = multiprocessing.cpu_count()
     simple_models = [
                 # PV-DM w/concatenation - window=5 (both sides) approximates paper's 10-word total window size
-                Doc2Vec(documents, dm=1, dm_concat=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=5, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DBOW
-                Doc2Vec(documents, dm=0, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=0, size=100, window=5, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                 # PV-DM w/average
-                Doc2Vec(documents, dm=1, dm_mean=1, size=400, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=cores),
+                Doc2Vec(documents, dm=1, dm_mean=1, size=100, window=5, negative=5, hs=0, sample=1e-3, iter=20, min_count=1, workers=cores),
                     ]
 
     models_by_name = OrderedDict((str(model), model) for model in simple_models)
     models_by_name['dbow+dmm'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[2]])
     models_by_name['dbow+dmc'] = ConcatenatedDoc2Vec([simple_models[1], simple_models[0]])
-
+    model_index = 1
     for name, model in models_by_name.items():
         print name
         train_targets, train_regressors = zip(*[(doc.sentiment, model.infer_vector(doc.words)) for doc in train_docs])
         test_targets, test_regressors = zip(*[(doc.sentiment, model.infer_vector(doc.words)) for doc in test_docs])
         util.logit(train_regressors, train_targets, test_regressors, test_targets)
+        vectors = []
+        for i in xrange(len(labels)):
+            vectors.append(model.docvecs['l'+str(i)])
+        visualize.draw_words(vectors, [str(i) for i in xrange(len(labels))], False, True, False, title=str(model_index))
+        model_index += 1
 
 
 def get_imdb_data():
@@ -253,7 +215,9 @@ def get_ng_data():
     # remove = ('headers', 'footers', 'quotes')
     data_train = fetch_20newsgroups(subset='train')
     data_test = fetch_20newsgroups(subset='test')
-    y_train, y_test = data_train.target, data_test.target
+    y_train, y_test = data_train.target, data_test.target # Label ID from 0 to 19
+    names = (list(data_train.target_names))
+    print names
     SentimentDocument = namedtuple('SentimentDocument', 'words tags split sentiment')
     alldocs = []
     for line_no, line in enumerate(data_train.data):
@@ -269,7 +233,7 @@ def get_ng_data():
             split = 'test'
             sentiment = y_test[line_no]  # [12.5K pos, 12.5K neg]*2 then unknown
             alldocs.append(SentimentDocument(words, tags, split, sentiment))
-    return alldocs
+    return alldocs, names
 
 def get_rcv():
     from sklearn.datasets import fetch_rcv1
@@ -278,8 +242,7 @@ def get_rcv():
         print doc
 
 if __name__ == '__main__':
-    data = get_ng_data()
-    doc_vect(data)
-    # label_vect(data)
-    label_vect_no_class(data)
-    label_doc_vect(data)
+    data, labels = get_ng_data()
+    # doc_vect(data)
+    label_vect_no_class(data, labels)
+    # label_doc_vect(data, labels)

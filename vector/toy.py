@@ -15,8 +15,8 @@ def test():
     documents = []
     documents.append(TaggedDocument('this book is good , I like it'.split(), ['g']))
     documents.append(TaggedDocument('this room is good , I like it'.split(), ['g']))
-    documents.append(TaggedDocument('this book is bad , I hate it'.split(), ['g']))
-    documents.append(TaggedDocument('this room is bad , I hate it'.split(), ['g']))
+    documents.append(TaggedDocument('this book is bad , I hate it'.split(), ['b']))
+    documents.append(TaggedDocument('this room is bad , I hate it'.split(), ['b']))
     # model =Doc2Vec(documents, dm=0, size=100, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=1)
 
     model = Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=3, negative=5, hs=1, iter=20, min_count=1, workers=1)
@@ -28,7 +28,9 @@ def test():
     print 'Similiarity of Book and Room: ', model.similarity('book', 'room')
     # print model.similarity('book', 'room') - model.similarity('bad', 'good')
     # print model.docvecs.similarity('1', '0')
-    visualize.draw_words(model, 'book room bad good like hate'.split(), True, True, True, -5, 5, -5, 5, r'Label2Vec')
+    s = 'book room bad good like hate'
+    vectors = [model[word] for word in s.split()]
+    visualize.draw_words(vectors, s.split(), True, True, True, r'Label2Vec')
 
 
 def test2():
@@ -49,7 +51,9 @@ def test2():
     # print model.similarity('book', 'room') - model.similarity('bad', 'good')
     # print model.docvecs.similarity('0', '1')
     # print model.docvecs.similarity('0', '2')
-    visualize.draw_words(model, 'book room bad good like hate'.split(), True, True, True, -5, 5, -5, 5, r'Doc2Vec')
+    s = 'book room bad good like hate'
+    vectors = [model[word] for word in s.split()]
+    visualize.draw_words(vectors, s.split(), True, True, True, r'Doc2Vec')
 
 
 test()

@@ -6,7 +6,6 @@ Created on 9:33 PM, 10/14/16
 """
 
 import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 # configuration
@@ -28,17 +27,13 @@ from sklearn.manifold import TSNE
 # @param float    y1        y axis range (from)
 # @param float    y2        y axis range (to)
 # @param string   title     for diagram
-def draw_words(vectors, words, pca=False, alternate=True, arrows=True, title=''):
+def draw_words(vectors, words, alternate=True, arrows=True, title=''):
     # get vectors for given words from model
     # vectors = [model[word] for word in words]
     # vectors = [model.infer_vector(word) for word in words]
 
-    if pca:
-        pca = PCA(n_components=2, whiten=True)
-        vectors2d = pca.fit(vectors).transform(vectors)
-    else:
-        tsne = TSNE(n_components=2, random_state=0)
-        vectors2d = tsne.fit_transform(vectors)
+    tsne = TSNE(n_components=2, init='pca', random_state=0)
+    vectors2d = tsne.fit_transform(vectors)
 
 
     first = True # color alternation to divide given groups

@@ -192,7 +192,7 @@ def label_vect_no_class(alldocs, labels):
         vectors = []
         for i in xrange(len(labels)):
             vectors.append(model.docvecs['l'+str(i)])
-        visualize.draw_words(vectors, [str(i) for i in xrange(len(labels))], False, True, False, title=str(model_index))
+        visualize.draw_words(vectors, [str(i) for i in xrange(len(labels))], True, False, title=str(model_index))
         model_index += 1
 
 

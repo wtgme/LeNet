@@ -8,33 +8,10 @@ Created on 9:33 PM, 10/14/16
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 
-# configuration
-# currency = ["Schweiz","Franken","Deutschland","Euro","Grossbritannien","britische_Pfund","Japan","Yen","Russland","Rubel","USA","US-Dollar","Kroatien","Kuna"]
-# capital  = ["Athen","Griechenland","Berlin","Deutschland","Ankara","Tuerkei","Bern","Schweiz","Hanoi","Vietnam","Lissabon","Portugal","Moskau","Russland","Stockholm","Schweden","Tokio","Japan","Washington","USA"]
-# language = ["Deutschland","Deutsch","USA","Englisch","Frankreich","Franzoesisch","Griechenland","Griechisch","Norwegen","Norwegisch","Schweden","Schwedisch","Polen","Polnisch","Ungarn","Ungarisch"]
-# matches = model.most_similar(positive=["Frau"], negative=[], topn=30)
-# words = [match[0] for match in matches]
 
-# function draw_words
-# ... reduces dimensionality of vectors of given words either with PCA or with t-SNE and draws the words into a diagram
-# @param word2vec model     to visualize vectors from
-# @param list     words     list of word strings to visualize
-# @param bool     pca       use PCA (True) or t-SNE (False) to reduce dimensionality
-# @param bool     alternate use different color and label align for every second word
-# @param bool     arrows    use arrows to connect related words (items that are next to each other in list)
-# @param float    x1        x axis range (from)
-# @param float    x2        x axis range (to)
-# @param float    y1        y axis range (from)
-# @param float    y2        y axis range (to)
-# @param string   title     for diagram
 def draw_words(vectors, words, alternate=True, arrows=True, title=''):
-    # get vectors for given words from model
-    # vectors = [model[word] for word in words]
-    # vectors = [model.infer_vector(word) for word in words]
-
     tsne = TSNE(n_components=2, init='pca', random_state=0)
     vectors2d = tsne.fit_transform(vectors)
-
 
     first = True # color alternation to divide given groups
     for point, word in zip(vectors2d, words):

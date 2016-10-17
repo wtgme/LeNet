@@ -10,3 +10,7 @@ data/cora/citations
 data/cora/classifications
 
 data/cora/papers
+
+*.pdf
+
+*.pdf

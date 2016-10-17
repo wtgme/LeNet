@@ -19,7 +19,7 @@ def test():
     documents.append(TaggedDocument('this room is bad , I do not like it'.split(), ['b']))
     # model =Doc2Vec(documents, dm=0, size=100, window=5, negative=5, hs=1, sample=1e-3, iter=20, min_count=1, workers=1)
 
-    model = Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=5, negative=5, hs=1, iter=50, min_count=1, workers=1)
+    model = Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=3, negative=5, hs=0, iter=50, min_count=1, workers=1)
     print('%s:\n %s' % (model, model.docvecs.most_similar('g')))
     v1 = model.infer_vector('this book is good'.split())
     v2 = model.infer_vector('this book is bad'.split())
@@ -41,7 +41,7 @@ def test2():
     documents.append(TaggedDocument('this room is bad , I do not like it'.split(), ['3']))
     # model =Doc2Vec(documents, dm=0, size=100, window=5, negative=5, hs=1, sample=1e-3, iter=20,min_count=1, workers=1)
 
-    model = Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=5, negative=5, hs=1, iter=50, min_count=1, workers=1)
+    model = Doc2Vec(documents, dm=1, dm_concat=1, size=100, window=3, negative=5, hs=0, iter=50, min_count=1, workers=1)
     print('%s:\n %s' % (model, model.docvecs.most_similar('0')))
     v1 = model.infer_vector('this book is good'.split())
     v2 = model.infer_vector('this book is bad'.split())

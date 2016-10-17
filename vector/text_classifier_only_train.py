@@ -217,7 +217,6 @@ def get_ng_data():
     data_test = fetch_20newsgroups(subset='test')
     y_train, y_test = data_train.target, data_test.target # Label ID from 0 to 19
     names = (list(data_train.target_names))
-    print names
     SentimentDocument = namedtuple('SentimentDocument', 'words tags split sentiment')
     alldocs = []
     for line_no, line in enumerate(data_train.data):

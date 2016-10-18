@@ -10,6 +10,7 @@ from sklearn import linear_model
 from sklearn.metrics import accuracy_score
 import numpy as np
 from sklearn.svm import SVC
+from collections import namedtuple
 
 # def classifier_cv(X, y, K=5):
 #     skf = StratifiedKFold(n_splits=K)
@@ -63,3 +64,58 @@ def pre_classify_text(X_train, y_train, X_test, y_test=None):
         print "Pre-classification accuracy: %0.4f" % accuracy_score(y_lin, y_test)
     return y_lin
 
+# Convert text to lower-case and strip punctuation/symbols from words
+def normalize_text(text):
+    norm_text = text.lower()
+    # Replace breaks with spaces
+    norm_text = norm_text.replace('<br />', ' ')
+    # Pad punctuation with spaces on both sides
+    for char in ['.', '"', ',', '(', ')', '!', '?', ';', ':']:
+        norm_text = norm_text.replace(char, ' ' + char + ' ')
+    return norm_text
+
+
+def get_imdb_data():
+    SentimentDocument = namedtuple('SentimentDocument', 'words tags split sentiment')
+    alldocs = []  # will hold all docs in original order
+    with open('aclImdb/alldata-id.txt', 'r') as alldata:
+        for line_no, line in enumerate(alldata):
+            tokens = line.split()
+            words = tokens[1:]
+            tags = [line_no]  # `tags = [tokens[0]]` would also work at extra memory cost
+            split = ['train', 'test', 'extra', 'extra'][line_no // 25000]  # 25k train, 25k test, 25k extra
+            sentiment = [1.0, 0.0, 1.0, 0.0, None, None, None, None][
+                line_no // 12500]  # [12.5K pos, 12.5K neg]*2 then unknown
+            alldocs.append(SentimentDocument(words, tags, split, sentiment))
+    return alldocs
+
+
+def get_ng_data():
+    from sklearn.datasets import fetch_20newsgroups
+    # remove = ('headers', 'footers', 'quotes')
+    data_train = fetch_20newsgroups(subset='train')
+    data_test = fetch_20newsgroups(subset='test')
+    y_train, y_test = data_train.target, data_test.target # Label ID from 0 to 19
+    # names = (list(data_train.target_names))
+    SentimentDocument = namedtuple('SentimentDocument', 'words tags split sentiment')
+    alldocs = []
+    for line_no, line in enumerate(data_train.data):
+            words = normalize_text(line).split()
+            tags = [line_no]  # `tags = [tokens[0]]` would also work at extra memory cost
+            split = 'train'
+            sentiment = y_train[line_no]  # [12.5K pos, 12.5K neg]*2 then unknown
+            alldocs.append(SentimentDocument(words, tags, split, sentiment))
+    train_len = len(data_train.data)
+    for line_no, line in enumerate(data_test.data):
+            words = normalize_text(line).split()
+            tags = [line_no+train_len]  # `tags = [tokens[0]]` would also work at extra memory cost
+            split = 'test'
+            sentiment = y_test[line_no]  # [12.5K pos, 12.5K neg]*2 then unknown
+            alldocs.append(SentimentDocument(words, tags, split, sentiment))
+    return alldocs
+
+def get_rcv():
+    from sklearn.datasets import fetch_rcv1
+    rcv1 = fetch_rcv1()
+    for doc in rcv1.data:
+        print doc

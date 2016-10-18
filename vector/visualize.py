@@ -7,7 +7,7 @@ Created on 9:33 PM, 10/14/16
 
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
-
+from scipy.spatial import distance
 
 def draw_words(vectors, words, alternate=True, arrows=True, title=''):
     tsne = TSNE(n_components=2, init='pca', random_state=0)
@@ -37,6 +37,7 @@ def draw_words(vectors, words, alternate=True, arrows=True, title=''):
             b = vectors2d[i][1]
             c = vectors2d[i+1][0]
             d = vectors2d[i+1][1]
+            # print distance.euclidean((a,b), (c,d))
             plt.arrow(a, b, c-a, d-b,
                 shape='full',
                 lw=0.1,

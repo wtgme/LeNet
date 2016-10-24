@@ -21,12 +21,12 @@ def draw_words(vectors, words, alternate=True, arrows=True, title=''):
         plt.annotate(
             word,
             xy = (point[0], point[1]),
-            xytext = (-20, -20) if first else (20, -20),
+            xytext = (-10, -10) if first else (10, -10),
             textcoords = 'offset points',
             ha = 'right' if first else 'left',
             va = 'bottom',
             size = "x-large",
-            arrowprops=dict(arrowstyle="->")
+            # arrowprops=dict(arrowstyle="->")
         )
         first = not first if alternate else first
 
@@ -39,13 +39,14 @@ def draw_words(vectors, words, alternate=True, arrows=True, title=''):
             d = vectors2d[i+1][1]
             # print distance.euclidean((a,b), (c,d))
             plt.arrow(a, b, c-a, d-b,
-                shape='full',
-                lw=0.1,
-                edgecolor='#bbbbbb',
-                facecolor='#bbbbbb',
-                length_includes_head=True,
-                head_width=0.03,
-                width=0.01
+                # shape='full',
+                # lw=0.1,
+                edgecolor='k',
+                facecolor='k',
+                # length_includes_head=True,
+                # head_width=0.03,
+                # width=0.01
+                shape='full', lw=1, length_includes_head=True, head_width=15
             )
 
     # draw diagram title
